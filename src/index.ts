@@ -2,6 +2,7 @@ import { RESTDataSource, WillSendRequestOptions  } from '@apollo/datasource-rest
 import type { KeyValueCache } from '@apollo/utils.keyvaluecache';
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
+import { IncomingMessage } from 'http';
 
 
 const typeDefs = `
@@ -74,13 +75,13 @@ const books = [
   ];
 
   const resolvers = {
-    Query: {
-      books: () => books,
-    },
+    players: async (_,__, { dataSources }) => {
+        return dataSources.moviesAPI.getPlayers();
+      }
   };
 
-  class MoviesAPI extends RESTDataSource { // highlight-line
-    override baseURL = 'https://movies-api.example.com/';
+  class pandaScoreApi extends RESTDataSource { // highlight-line
+    override baseURL = 'https://api.pandascore.co/';
     private token: string;
   
     constructor(options: { token: string; cache: KeyValueCache }) {
@@ -90,10 +91,11 @@ const books = [
   
     override willSendRequest(request: WillSendRequestOptions) {
       request.headers['authorization'] = this.token;
+      request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
     }
   
-    async getMovie(id: string): Promise<Movie> {
-      return this.get<Movie>(`movies/${encodeURIComponent(id)}`);
+    async getPlayers(id: string)  {
+      return this.get(`players`);
     }
   }
   
@@ -101,7 +103,7 @@ const books = [
   interface ContextValue {
     token: string;
     dataSources: {
-      moviesAPI: MoviesAPI;
+        pandascoreApi: pandaScoreApi;
     };
   }
   // highlight-end
@@ -114,7 +116,30 @@ const books = [
   });
 
   const { url } = await startStandaloneServer(server, {
-    listen: { port: 4000 },
+    context: async ({ req }) => {
+      const token = getTokenFromRequest(req);
+      const { cache } = server;
+      return {
+        token,
+        //highlight-start
+        dataSources: {
+          moviesAPI: new pandaScoreApi({ cache, token }),
+        },
+        //highlight-end
+      };
+    },
   });
   
+  function getTokenFromRequest(req: IncomingMessage) {
+
+    let token = '';
+    req.setEncoding("utf8");
+    if(IncomingMessage){
+      token += IncomingMessage;
+    }
+   return token;
+  }
+  
   console.log(`🚀  Server ready at: ${url}`);
+
+  
