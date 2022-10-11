@@ -3,7 +3,7 @@ import { startStandaloneServer } from '@apollo/server/standalone';
 
 const typeDefs = `
 
- union Participant = Player | Team
+ union Participant = Player | Team | image | location
 
  type Featured{
     participants: [Participant!]
