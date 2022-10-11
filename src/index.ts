@@ -2,16 +2,60 @@ import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 
 const typeDefs = `
-  type Book {
-    title: String
-    author: String
+
+ union Participant = Player | Team
+
+ type Featured{
+    participants: [Participant!]
+ }
+
+  type Article{
+    title: String!
+    text: String!
+  }
+ 
+  type Videogame{
+    id: Int!
+    slug: String!
+    title: String!
+    description: Article
+    players: [Player!]
+  }
+  
+  type Team{
+    id: Int!
+    slug: String!
+    acronym: String!
+    name: String!
+    location: String!
+    players: [Player!]!
+    image: String
+    videogame: Videogame!
+  }
+   
+  type Player {
+    id: Int!
+    slug: String!
+    birthdayYear: Int!
+    birthday: String!
+    team: Team
+    videogame: Videogame!
+    firstName: String!
+    lastName: String!
+    name: String!
+    nationality: String
+    image: String
+
   }
 
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
   type Query {
-    books: [Book]
+    player: Player
+    players: [Player!]
+    team: Team
+    teams: [Team!]
+    videogame: Videogame
+    videogames: [Videogame!]
+    featured: Featured
   }
 `;
 
