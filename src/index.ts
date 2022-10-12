@@ -7,8 +7,7 @@ import { IncomingMessage } from 'http';
 
 const typeDefs = `
 
- union Participant = Player | Team | image | location
-
+ union Participant = Player | Team
  type Featured{
     participants: [Participant!]
  }
@@ -63,22 +62,20 @@ const typeDefs = `
   }
 `;
 
-const books = [
-    {
-      title: 'The Awakening',
-      author: 'Kate Chopin',
+const resolvers = {
+    Query: {
+        players: async (_, __, { dataSources }) => {
+            return dataSources.pandaScoreApi.getPlayers();
+          },
     },
-    {
-      title: 'City of Glass',
-      author: 'Paul Auster',
-    },
-  ];
-
-  const resolvers = {
-    players: async (_,__, { dataSources }) => {
-        return dataSources.moviesAPI.getPlayers();
-      }
   };
+  interface ContextValue {
+    token: string;
+    dataSources: {
+        pandascoreApi: pandaScoreApi;
+    };
+  }
+  // highlight-end
 
   class pandaScoreApi extends RESTDataSource { // highlight-line
     override baseURL = 'https://api.pandascore.co/';
@@ -90,7 +87,6 @@ const books = [
     }
   
     override willSendRequest(request: WillSendRequestOptions) {
-      request.headers['authorization'] = this.token;
       request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
     }
   
@@ -100,32 +96,23 @@ const books = [
   }
   
   // highlight-start
-  interface ContextValue {
-    token: string;
-    dataSources: {
-        pandascoreApi: pandaScoreApi;
-    };
-  }
-  // highlight-end
   
 
 
-  const server = new ApolloServer({
+  const server = new ApolloServer<ContextValue>({
     typeDefs,
     resolvers,
   });
 
   const { url } = await startStandaloneServer(server, {
     context: async ({ req }) => {
-      const token = getTokenFromRequest(req);
+      const token =  getTokenFromRequest(req);
       const { cache } = server;
       return {
         token,
-        //highlight-start
         dataSources: {
-          moviesAPI: new pandaScoreApi({ cache, token }),
+            pandascoreApi: new pandaScoreApi({ cache, token }),
         },
-        //highlight-end
       };
     },
   });
