@@ -1,7 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest';
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import { IncomingMessage } from 'http';
 const typeDefs = `
 
  union Participant = Player | Team
@@ -97,11 +96,20 @@ const { url } = await startStandaloneServer(server, {
     },
 });
 function getTokenFromRequest(req) {
-    let token = '';
-    req.setEncoding("utf8");
-    if (IncomingMessage) {
-        token += IncomingMessage;
+    const AuthHeader = req.headers.authorization || '';
+    if (AuthHeader) {
+        const token = AuthHeader.split('Bearer')[1];
+        if (token) {
+            try {
+                return token;
+            }
+            catch (err) {
+                throw new Error('Invalid/Expored token');
+            }
+        }
+        throw new Error('Authentication token must be Bearer[token]');
     }
-    return token;
+    throw new Error('Authentication header must be provided');
 }
+;
 console.log(`🚀  Server ready at: ${url}`);

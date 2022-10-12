@@ -118,14 +118,20 @@ const resolvers = {
   });
   
   function getTokenFromRequest(req: IncomingMessage) {
-
-    let token = '';
-    req.setEncoding("utf8");
-    if(IncomingMessage){
-      token += IncomingMessage;
+    const AuthHeader = req.headers.authorization || '';
+    if(AuthHeader){
+        const token = AuthHeader.split('Bearer')[1];
+        if(token){
+            try{
+                return token;
+            }catch(err){
+               throw new Error('Invalid/Expored token');
+            }
+        }
+        throw new Error('Authentication token must be Bearer[token]');
     }
-   return token;
-  }
+    throw new Error('Authentication header must be provided');
+  };
   
   console.log(`🚀  Server ready at: ${url}`);
 
