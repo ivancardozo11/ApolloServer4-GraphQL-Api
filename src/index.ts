@@ -122,7 +122,7 @@ const resolvers = {
     if(AuthHeader){
         const token = AuthHeader.split('Bearer')[1];
         if(token){
-            try{
+            try{    
                 return token;
             }catch(err){
                throw new Error('Invalid/Expored token');
