@@ -3,6 +3,10 @@ import type { KeyValueCache } from '@apollo/utils.keyvaluecache';
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { IncomingMessage } from 'http';
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault,
+} from '@apollo/server/plugin/landingPage/default';
 
 
 const typeDefs = `
@@ -194,6 +198,11 @@ const resolvers = {
   const server = new ApolloServer<ContextValue>({
     typeDefs,
     resolvers,
+    plugins: [
+      process.env.NODE_ENV === 'production'
+        ? ApolloServerPluginLandingPageProductionDefault()
+        : ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+    ]
   });
 
   const { url } = await startStandaloneServer(server, {
