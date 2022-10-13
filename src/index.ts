@@ -66,7 +66,7 @@ const resolvers = {
     Query: {
       //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
         players: async (_,__, { dataSources }) => {
-            return dataSources.pandaScoreApi.getPlayers();
+            return dataSources.pandaScoreApi.getListOfPlayers();
           },
       //player(id): return all the info for a Player
         player: async(_,{ id },{ dataSources })=>{
@@ -75,8 +75,21 @@ const resolvers = {
           // videogames: return a list of Videogames
         videogames: async(_,__,{dataSources})=>{
           return dataSources.pandaScoreApi.getListOfVideoGames();
+        },
+       // videogame(id): return all the details of a Videogame
+        videogame: async(_,{ id },{ dataSources })=>{
+        return dataSources.pandaScoreApi.getVideoGame(id);
+       },
+        teams: async(_,__,{dataSources}) =>{
+          return dataSources.pandascoreApi.getListOfTeams();
+       },
+       //team(id): return all the details of a Team
+        team: async(_,{id},{dataSources}) =>{
+          return dataSources.pandaScoreApi.getTeam(id);
+       },
 
-        }
+       
+
     },
   };
   interface ContextValue {
@@ -101,7 +114,7 @@ const resolvers = {
     }
 
     //players(limit?, page?): return a list of Players
-    async getPlayers(limit, page)  {
+    async getListOfPlayers(limit, page)  {
 
       try{
         const data = await this.get(`players?sort=&page=${page}&per_page=${limit}`)
@@ -137,7 +150,41 @@ const resolvers = {
         throw new Error(err);
       }     
     }
-  }
+    // videogame(id): return all the details of a Videogame
+    /*slug examples:
+      "cod-mw" ,"cs-go" ,"dota-2" , "fifa" ,"kog" ,"league-of-legends" ,"lol-wild-rift" ,"ow" ,"pubg","r6-siege","rl","starcraft-2","starcraft-brood-war","valorant" */
+    async getVideoGame(videogame_id_or_slug)  {
+      try{
+        const data = await this.get(`videogames/${videogame_id_or_slug}`);
+        return data;
+
+      }catch(err){
+        throw new Error(err);
+      }  
+    }
+
+    //teams: return a list of Teams
+
+    async getListOfTeams(limit, page)  {
+      try{
+        const data = await this.get(`teams?sort=&page=${page}&per_page=${limit}`);
+        return data;
+
+      }catch(err){
+        throw new Error(err);
+      }  
+    }
+    // team(id): return all the details of a Team
+   // https://api.pandascore.co/teams/league-of-legends
+    async getTeam(team_id_or_slug){
+      try{
+        const data = await this.get(`teams/${team_id_or_slug}`);
+        return data;
+
+      }catch(err){
+        throw new Error(err);
+      }  
+    }
   
   // highlight-start
   
