@@ -57,7 +57,7 @@ const typeDefs = `
     team: Team
     teams: [Team!]
     videogame: Videogame
-    videogames: [Videogame!]
+    videogames(limit: Int, page: Int): [Videogame!]
     featured: Featured
   }
 `;
@@ -72,6 +72,11 @@ const resolvers = {
         player: async(_,{ id },{ dataSources })=>{
           return dataSources.pandascoreApi.getPlayer(id);
           },
+          // videogames: return a list of Videogames
+        videogames: async(_,__,{dataSources})=>{
+          return dataSources.pandaScoreApi.getListOfVideoGames();
+
+        }
     },
   };
   interface ContextValue {
@@ -99,7 +104,7 @@ const resolvers = {
     async getPlayers(limit, page)  {
 
       try{
-        const data = await this.get(`players?sort=&page=${limit}&per_page=${page}`)
+        const data = await this.get(`players?sort=&page=${page}&per_page=${limit}`)
         return data;
 
       }catch(err){
@@ -109,16 +114,28 @@ const resolvers = {
     }
 
     //player(id): return all the info for a Player
-    async getPlayer(id)  {
+    // return example :{ "id": 1, "name": "LoL", "slug": "league-of-legends" }
+    async getPlayer(player_id_or_slug)  {
 
       try{
-        const data = await this.get(`players/${id}`);
+        const data = await this.get(`players/${player_id_or_slug}`);
         return data;
 
       }catch(err){
         throw new Error(err);
-      }
-      
+      }  
+    }
+
+
+    // videogames: return a list of Videogames
+    async getListOfVideoGames(limit, page)  {
+      try{
+        const data = await this.get(`videogames?page=${limit}&per_page=${page}`);
+        return data;
+
+      }catch(err){
+        throw new Error(err);
+      }     
     }
   }
   

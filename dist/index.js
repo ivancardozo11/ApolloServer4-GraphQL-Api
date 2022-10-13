@@ -63,6 +63,7 @@ const resolvers = {
         players: async (_, __, { dataSources }) => {
             return dataSources.pandaScoreApi.getPlayers();
         },
+        //player(id): return all the info for a Player
         player: async (_, { id }, { dataSources }) => {
             return dataSources.pandascoreApi.getPlayer(id);
         },
@@ -78,18 +79,21 @@ class pandaScoreApi extends RESTDataSource {
     willSendRequest(request) {
         request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
     }
+    //players(limit?, page?): return a list of Players
     async getPlayers(limit, page) {
         try {
-            const data = await this.get(`players?sort=&page=1&per_page=1`);
+            const data = await this.get(`players?sort=&page=${limit}&per_page=${page}`);
             return data;
         }
         catch (err) {
             throw new Error(err);
         }
     }
-    async getPlayer(id) {
+    //player(id): return all the info for a Player
+    //https://api.pandascore.co/players/{player_id_or_slug}
+    async getPlayer(player_id_or_slug) {
         try {
-            const data = await this.get(`players/${id}`);
+            const data = await this.get(`players/${player_id_or_slug}`);
             return data;
         }
         catch (err) {
@@ -120,7 +124,7 @@ function getTokenFromRequest(req) {
         const token = AuthHeader.split('Bearer')[1];
         if (token) {
             try {
-                return token;
+                return AuthHeader;
             }
             catch (err) {
                 throw new Error('Invalid/Expored token');
