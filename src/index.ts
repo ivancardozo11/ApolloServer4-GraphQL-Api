@@ -185,6 +185,7 @@ const resolvers = {
         throw new Error(err);
       }  
     }
+  }
   
   // highlight-start
   
