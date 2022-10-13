@@ -1,15 +1,135 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
-import { IncomingMessage } from 'http';
 import {
   ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginLandingPageProductionDefault,
 } from '@apollo/server/plugin/landingPage/default';
 import { readFileSync } from 'fs';
-import resolvers from './resolvers/resolvers';
-import pandaScoreApi from './api/pandascore-api';
+import { RESTDataSource, WillSendRequestOptions  } from '@apollo/datasource-rest';
+import type { KeyValueCache } from '@apollo/utils.keyvaluecache';
+import { IncomingMessage } from 'http';
 
-const typeDefs = readFileSync('./schema.graphql', { encoding: 'utf-8' });
+const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
+
+
+
+// this class is here couse there is a bug called Error [ERR_MODULE_NOT_FOUND] while importing from  api/ and export default doesnt work
+class pandaScoreApi extends RESTDataSource { // highlight-line
+  override baseURL = 'https://api.pandascore.co/';
+  private token: string;
+
+  constructor(options: { token: string; cache: KeyValueCache }) {
+    super(options); // this sends our server's `cache` through
+    this.token = options.token;
+  }
+
+  override willSendRequest(request: WillSendRequestOptions) {
+    request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
+  }
+
+  //players(limit?, page?): return a list of Players
+  async getListOfPlayers(limit, page)  {
+
+    try{
+      const data = await this.get(`players?sort=&page=${page}&per_page=${limit}`)
+      return data;
+
+    }catch(err){
+      throw new Error(err);
+    }
+    
+  }
+
+  //player(id): return all the info for a Player
+  // return example :{ "id": 1, "name": "LoL", "slug": "league-of-legends" }
+  async getPlayer(player_id_or_slug)  {
+
+    try{
+      const data = await this.get(`players/${player_id_or_slug}`);
+      return data;
+
+    }catch(err){
+      throw new Error(err);
+    }  
+  }
+
+
+  // videogames: return a list of Videogames
+  async getListOfVideoGames(limit, page)  {
+    try{
+      const data = await this.get(`videogames?page=${limit}&per_page=${page}`);
+      return data;
+
+    }catch(err){
+      throw new Error(err);
+    }     
+  }
+  // videogame(id): return all the details of a Videogame
+  /*slug examples:
+    "cod-mw" ,"cs-go" ,"dota-2" , "fifa" ,"kog" ,"league-of-legends" ,"lol-wild-rift" ,"ow" ,"pubg","r6-siege","rl","starcraft-2","starcraft-brood-war","valorant" */
+  async getVideoGame(videogame_id_or_slug)  {
+    try{
+      const data = await this.get(`videogames/${videogame_id_or_slug}`);
+      return data;
+
+    }catch(err){
+      throw new Error(err);
+    }  
+  }
+
+  //teams: return a list of Teams
+
+  async getListOfTeams(limit, page)  {
+    try{
+      const data = await this.get(`teams?sort=&page=${page}&per_page=${limit}`);
+      return data;
+
+    }catch(err){
+      throw new Error(err);
+    }  
+  }
+  // team(id): return all the details of a Team
+ // https://api.pandascore.co/teams/league-of-legends
+  async getTeam(team_id_or_slug){
+    try{
+      const data = await this.get(`teams/${team_id_or_slug}`);
+      return data;
+
+    }catch(err){
+      throw new Error(err);
+    }  
+  }
+}
+
+
+//import problem with resolvers at resolvers/resolvers.ts
+const resolvers = {
+  Query: {
+    //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
+      players: async (_,__, { dataSources }) => {
+          return dataSources.pandaScoreApi.getListOfPlayers();
+        },
+    //player(id): return all the info for a Player
+      player: async(_,{ id },{ dataSources })=>{
+        return dataSources.pandascoreApi.getPlayer(id);
+        },
+        // videogames: return a list of Videogames
+      videogames: async(_,__,{dataSources})=>{
+        return dataSources.pandaScoreApi.getListOfVideoGames();
+      },
+     // videogame(id): return all the details of a Videogame
+      videogame: async(_,{ id },{ dataSources })=>{
+      return dataSources.pandaScoreApi.getVideoGame(id);
+     },
+      teams: async(_,__,{dataSources}) =>{
+        return dataSources.pandascoreApi.getListOfTeams();
+     },
+     //team(id): return all the details of a Team
+      team: async(_,{id},{dataSources}) =>{
+        return dataSources.pandaScoreApi.getTeam(id);
+     }   
+  },
+};
 
   interface ContextValue {
     token: string;
@@ -41,7 +161,8 @@ const typeDefs = readFileSync('./schema.graphql', { encoding: 'utf-8' });
       };
     },
   });
-  
+
+  // this file is here couse there is a proble while importing Error [ERR_MODULE_NOT_FOUND]: Cannot find module and export is not working
   function getTokenFromRequest(req: IncomingMessage) {
     const AuthHeader = req.headers.authorization || '';
     if(AuthHeader){

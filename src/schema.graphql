@@ -1,5 +1,3 @@
-
-
  union Participant = Player | Team
 
  type Featured{
