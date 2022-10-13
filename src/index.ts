@@ -7,95 +7,9 @@ import {
   ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginLandingPageProductionDefault,
 } from '@apollo/server/plugin/landingPage/default';
+import { readFileSync } from 'fs';
+const typeDefs = readFileSync('./schema.graphql', { encoding: 'utf-8' });
 
-
-const typeDefs = `
-
- union Participant = Player | Team
- type Featured{
-    participants: [Participant!]
- }
-
-  type Article{
-    title: String!
-    text: String!
-  }
- 
-  type Videogame{
-    id: Int!
-    slug: String!
-    title: String!
-    description: Article
-    players: [Player!]
-  }
-  
-  type Team{
-    id: Int!
-    slug: String!
-    acronym: String!
-    name: String!
-    location: String!
-    players: [Player!]!
-    image: String
-    videogame: Videogame!
-  }
-   
-  type Player {
-    id: Int!
-    slug: String!
-    birthdayYear: Int!
-    birthday: String!
-    team: Team
-    videogame: Videogame!
-    firstName: String!
-    lastName: String!
-    name: String!
-    nationality: String
-    image: String
-
-  }
-
-  type Query {
-    player: Player
-    players(limit: Int, page: Int): [Player!]
-    team: Team
-    teams: [Team!]
-    videogame: Videogame
-    videogames(limit: Int, page: Int): [Videogame!]
-    featured: Featured
-  }
-`;
-
-const resolvers = {
-    Query: {
-      //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
-        players: async (_,__, { dataSources }) => {
-            return dataSources.pandaScoreApi.getListOfPlayers();
-          },
-      //player(id): return all the info for a Player
-        player: async(_,{ id },{ dataSources })=>{
-          return dataSources.pandascoreApi.getPlayer(id);
-          },
-          // videogames: return a list of Videogames
-        videogames: async(_,__,{dataSources})=>{
-          return dataSources.pandaScoreApi.getListOfVideoGames();
-        },
-       // videogame(id): return all the details of a Videogame
-        videogame: async(_,{ id },{ dataSources })=>{
-        return dataSources.pandaScoreApi.getVideoGame(id);
-       },
-        teams: async(_,__,{dataSources}) =>{
-          return dataSources.pandascoreApi.getListOfTeams();
-       },
-       //team(id): return all the details of a Team
-        team: async(_,{id},{dataSources}) =>{
-          return dataSources.pandaScoreApi.getTeam(id);
-       },
-
-       
-
-    },
-  };
   interface ContextValue {
     token: string;
     dataSources: {
