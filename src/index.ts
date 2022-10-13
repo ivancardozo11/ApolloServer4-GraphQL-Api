@@ -53,7 +53,7 @@ const typeDefs = `
 
   type Query {
     player: Player
-    players: [Player!]
+    players(limit: Int, page: Int): [Player!]
     team: Team
     teams: [Team!]
     videogame: Videogame
@@ -64,8 +64,13 @@ const typeDefs = `
 
 const resolvers = {
     Query: {
-        players: async (_, __, { dataSources }) => {
+      //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
+        players: async (_,__, { dataSources }) => {
             return dataSources.pandaScoreApi.getPlayers();
+          },
+      //player(id): return all the info for a Player
+        player: async(_,{ id },{ dataSources })=>{
+          return dataSources.pandascoreApi.getPlayer(id);
           },
     },
   };
@@ -89,9 +94,31 @@ const resolvers = {
     override willSendRequest(request: WillSendRequestOptions) {
       request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
     }
-  
-    async getPlayers(id: string)  {
-      return this.get(`players`);
+
+    //players(limit?, page?): return a list of Players
+    async getPlayers(limit, page)  {
+
+      try{
+        const data = await this.get(`players?sort=&page=${limit}&per_page=${page}`)
+        return data;
+
+      }catch(err){
+        throw new Error(err);
+      }
+      
+    }
+
+    //player(id): return all the info for a Player
+    async getPlayer(id)  {
+
+      try{
+        const data = await this.get(`players/${id}`);
+        return data;
+
+      }catch(err){
+        throw new Error(err);
+      }
+      
     }
   }
   

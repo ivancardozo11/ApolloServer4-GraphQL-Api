@@ -49,7 +49,7 @@ const typeDefs = `
 
   type Query {
     player: Player
-    players: [Player!]
+    players(limit: Int, page: Int): [Player!]
     team: Team
     teams: [Team!]
     videogame: Videogame
@@ -59,8 +59,12 @@ const typeDefs = `
 `;
 const resolvers = {
     Query: {
+        //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
         players: async (_, __, { dataSources }) => {
             return dataSources.pandaScoreApi.getPlayers();
+        },
+        player: async (_, { id }, { dataSources }) => {
+            return dataSources.pandascoreApi.getPlayer(id);
         },
     },
 };
@@ -74,8 +78,23 @@ class pandaScoreApi extends RESTDataSource {
     willSendRequest(request) {
         request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
     }
-    async getPlayers(id) {
-        return this.get(`players`);
+    async getPlayers(limit, page) {
+        try {
+            const data = await this.get(`players?sort=&page=1&per_page=1`);
+            return data;
+        }
+        catch (err) {
+            throw new Error(err);
+        }
+    }
+    async getPlayer(id) {
+        try {
+            const data = await this.get(`players/${id}`);
+            return data;
+        }
+        catch (err) {
+            throw new Error(err);
+        }
     }
 }
 // highlight-start
