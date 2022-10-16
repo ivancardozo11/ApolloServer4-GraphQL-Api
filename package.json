@@ -16,7 +16,8 @@
   "dependencies": {
     "@apollo/datasource-rest": "^4.3.0",
     "@apollo/server": "^4.0.0",
-    "graphql": "^16.6.0"
+    "graphql": "^16.6.0",
+    "graphql-tag": "^2.12.6"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^2.13.7",
