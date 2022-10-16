@@ -1,53 +1,54 @@
-#  union Participant = Player | Team
+union Participant = Player | Team
 
-#  type Featured{
-#     participants: [Participant!]
-#  }
+type Featured{
+   participants: [Participant!]
+}
 
-#   type Article{
-#     title: String!
-#     text: String!
-#   }
+ type Article{
+   title: String!
+   text: String!
+ }
+
+ type Videogame{
+   id: Int!
+   slug: String!
+   title: String!
+   description: Article
+   players: [Player!]
+ }
  
-#   type Videogame{
-#     id: Int!
-#     slug: String!
-#     title: String!
-#     description: Article
-#     players: [Player!]
-#   }
+ type Team{
+   id: Int!
+   slug: String!
+   acronym: String!
+   name: String!
+   location: String!
+   players: [Player!]!
+   image: String
+   videogame: Videogame!
+ }
   
-#   type Team{
-#     id: Int!
-#     slug: String!
-#     acronym: String!
-#     name: String!
-#     location: String!
-#     players: [Player!]!
-#     image: String
-#     videogame: Videogame!
-#   }
-   
-#   type Player {
-#     id: Int!
-#     slug: String!
-#     birthday: String!
-#     team: Team
-#     videogame: Videogame!
-#     firstName: String!
-#     lastName: String!
-#     name: String!
-#     nationality: String
-#     image: String
+ type Player {
+   id: Int!
+   slug: String!
+   birthday: String
+   team: Team
+   videogame: Videogame!
+   firstName: String!
+   lastName: String!
+   name: String!
+   nationality: String!
+   image: String
+   role: String!
 
-#   }
+ }
 
-#   type Query {
-#     player: Player
-#     players: [Player!]
-#     team: Team
-#     teams: [Team!]
-#     videogame: Videogame
-#     videogames(limit: Int, page: Int): [Videogame!]
-#     featured: Featured
-#   }
+ type Query {
+   players(page: Int, per_page: Int): [Player!]!
+   player(id: Int!): Player
+   team: Team
+   teams: [Team!]
+   videogame: Videogame
+   videogames(limit: Int, page: Int): [Videogame!]
+   featured: Featured
+ }

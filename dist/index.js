@@ -69,8 +69,8 @@ class pandaScoreApi extends RESTDataSource {
         request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
     }
     //players(limit?, page?): return a list of Players
-    async getListOfPlayers() {
-        const players = await this.get(`players`);
+    async getListOfPlayers(page, per_page) {
+        const players = await this.get(`players?sort=&page=${page}&per_page=${per_page}`);
         return players.data;
     }
     //player(id): return all the info for a Player
@@ -102,8 +102,16 @@ class pandaScoreApi extends RESTDataSource {
 const resolvers = {
     Query: {
         //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
-        players: async (_, __, { dataSources }) => {
-            const players = await dataSources.pandaScoreApi.getListOfPlayers();
+        players: async (_, args, { dataSources }) => {
+            try {
+                const { page, per_page } = args;
+                const players = await dataSources.pandaScoreApi.getListOfPlayers(page, per_page);
+                return players;
+            }
+            catch (error) {
+                console.log(error);
+                throw new Error(`Failed to query : ${error}`);
+            }
         },
         //player(id): return all the info for a Player
         player: async (_, { id }, { dataSources }) => {
