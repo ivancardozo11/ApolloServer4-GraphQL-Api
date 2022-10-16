@@ -1,5 +1,6 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
+import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault, } from '@apollo/server/plugin/landingPage/default';
 import { RESTDataSource } from '@apollo/datasource-rest';
 // const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
 const typeDefs = ` union Participant = Player | Team
@@ -35,20 +36,21 @@ type Featured{
  type Player {
    id: Int!
    slug: String!
-   birthday: String!
+   birthday: String
    team: Team
    videogame: Videogame!
    firstName: String!
    lastName: String!
    name: String!
-   nationality: String
+   nationality: String!
    image: String
+   role: String!
 
  }
 
  type Query {
-   player: Player
-   players: [Player!]!
+   players(page: Int, per_page: Int): [Player!]!
+   player(id: Int!): Player
    team: Team
    teams: [Team!]
    videogame: Videogame
@@ -68,93 +70,79 @@ class pandaScoreApi extends RESTDataSource {
     }
     //players(limit?, page?): return a list of Players
     async getListOfPlayers() {
-        return this.get(`players?sort=&page=number=1&size=1&per_page=1`);
+        const players = await this.get(`players`);
+        return players.data;
     }
     //player(id): return all the info for a Player
     // return example :{ "id": 1, "name": "LoL", "slug": "league-of-legends" }
-    async getPlayer(player_id_or_slug) {
-        try {
-            const data = await this.get(`players/${player_id_or_slug}`);
-            return data;
-        }
-        catch (err) {
-            throw new Error(err);
-        }
+    async getPlayer(id) {
+        const result = await this.get(`players/${id}`);
+        return result;
     }
     // videogames: return a list of Videogames
-    async getListOfVideoGames(limit, page) {
-        try {
-            const data = await this.get(`videogames?page=${limit}&per_page=${page}`);
-            return data;
-        }
-        catch (err) {
-            throw new Error(err);
-        }
+    async getListOfVideoGames() {
+        return this.get(`videogames?page=1&per_page=1`);
     }
     // videogame(id): return all the details of a Videogame
     /*slug examples:
       "cod-mw" ,"cs-go" ,"dota-2" , "fifa" ,"kog" ,"league-of-legends" ,"lol-wild-rift" ,"ow" ,"pubg","r6-siege","rl","starcraft-2","starcraft-brood-war","valorant" */
-    async getVideoGame(videogame_id_or_slug) {
-        try {
-            const data = await this.get(`videogames/${videogame_id_or_slug}`);
-            return data;
-        }
-        catch (err) {
-            throw new Error(err);
-        }
+    async getVideoGame() {
+        return this.get(`videogames/fifa`);
     }
     //teams: return a list of Teams
-    async getListOfTeams(limit, page) {
-        try {
-            const data = await this.get(`teams?sort=&page=${page}&per_page=${limit}`);
-            return data;
-        }
-        catch (err) {
-            throw new Error(err);
-        }
+    async getListOfTeams() {
+        return this.get(`teams?sort=&page=1&per_page=1`);
     }
     // team(id): return all the details of a Team
     // https://api.pandascore.co/teams/league-of-legends
-    async getTeam(team_id_or_slug) {
-        try {
-            const data = await this.get(`teams/${team_id_or_slug}`);
-            return data;
-        }
-        catch (err) {
-            throw new Error(err);
-        }
+    async getTeam() {
+        return this.get(`teams/league-of-legends`);
     }
 }
 const resolvers = {
     Query: {
         //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
         players: async (_, __, { dataSources }) => {
+            const players = await dataSources.pandaScoreApi.getListOfPlayers();
+        },
+        //player(id): return all the info for a Player
+        player: async (_, { id }, { dataSources }) => {
             try {
-                const playerList = await dataSources.pandaScoreApi.getListOfPlayers();
-                return playerList.map(player => ({
-                    id: player.id,
-                    slug: player.slug,
-                    birthday: player.birthday,
-                    team: player.current_team,
-                    videogame: player.current_videogame,
-                    firstname: player.first_name,
-                    lastName: player.last_name,
-                    name: player.name,
-                    nationality: player.nationality,
-                    image: player.image_url
-                }));
+                const playerById = await dataSources.pandaScoreApi.getPlayer(id);
+                return {
+                    data: {
+                        id: playerById.id,
+                        slug: playerById.slug,
+                        birthday: playerById.birthday,
+                        videogame: playerById.current_videogame,
+                        team: playerById.current_team,
+                        firstname: playerById.first_name,
+                        lastName: playerById.last_name,
+                        name: playerById.name,
+                        nationality: playerById.nationality,
+                        image: playerById.image_url,
+                        role: playerById.role
+                    }
+                };
             }
             catch (error) {
                 throw error;
             }
         },
-        //player(id): return all the info for a Player
-        player: async (_, { id }, { dataSources }) => {
-            return dataSources.pandascoreApi.getPlayer(id);
-        },
         // videogames: return a list of Videogames
         videogames: async (_, __, { dataSources }) => {
-            return dataSources.pandaScoreApi.getListOfVideoGames();
+            try {
+                const videogamesList = await dataSources.pandaScoreApi.getListOfVideoGames();
+                return videogamesList.map(videogames => ({
+                    id: videogames.id,
+                    slug: videogames.slug,
+                    title: videogames.name,
+                    description: videogames.leagues
+                }));
+            }
+            catch (error) {
+                throw error;
+            }
         },
         // videogame(id): return all the details of a Videogame
         videogame: async (_, { id }, { dataSources }) => {
@@ -169,7 +157,15 @@ const resolvers = {
         }
     },
 };
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    plugins: [
+        process.env.NODE_ENV === 'production'
+            ? ApolloServerPluginLandingPageProductionDefault()
+            : ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+    ]
+});
 const { url } = await startStandaloneServer(server, {
     context: async ({ req }) => {
         const token = getTokenFromRequest(req);

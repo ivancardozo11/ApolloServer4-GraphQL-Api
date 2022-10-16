@@ -44,20 +44,21 @@ type Featured{
  type Player {
    id: Int!
    slug: String!
-   birthday: String!
+   birthday: String
    team: Team
    videogame: Videogame!
    firstName: String!
    lastName: String!
    name: String!
-   nationality: String
+   nationality: String!
    image: String
+   role: String!
 
  }
 
  type Query {
-   player(id: ID!): Player
-   players: [Player!]!
+   players(page: Int, per_page: Int): [Player!]!
+   player(id: Int!): Player
    team: Team
    teams: [Team!]
    videogame: Videogame
@@ -83,14 +84,18 @@ type Featured{
 
 
   //players(limit?, page?): return a list of Players
-  async getListOfPlayers() {
-    return this.get(`players?sort=&page=number=1&size=1&per_page=1`);
+  async getListOfPlayers(page, per_page) {
+
+    const players = await this.get(`players?sort=&page=${page}&per_page=${per_page}`);
+    return players.data;
+    
   }
 
   //player(id): return all the info for a Player
   // return example :{ "id": 1, "name": "LoL", "slug": "league-of-legends" }
   async getPlayer(id)  {
-    return this.get(`players/${id}`);
+    const result = await this.get(`players/${id}`);
+    return result;
   }
 
 
@@ -125,21 +130,14 @@ type Featured{
 const resolvers = {
   Query: {
     //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
-      players: async (_,__, { dataSources }) => {
+      players: async (_, args, { dataSources }) => {
           try{
-            const playerList = await  dataSources.pandaScoreApi.getListOfPlayers();
-            return playerList.map(player =>({ 
-              id: player.id,
-              slug: player.slug,
-              birthday: player.birthday,
-              team: player.current_team,
-              videogame: player.current_videogame,
-              firstname: player.first_name,
-              lastName: player.last_name,
-              name: player.name,
-              nationality: player.nationality,
-              image: player.image_url
-             }))
+            const { page, per_page } = args;
+            const players = await dataSources.pandaScoreApi.getListOfPlayers(
+              page,
+              per_page
+            );
+            return players;
           }catch(error){
             throw error;
           }
@@ -147,26 +145,39 @@ const resolvers = {
     //player(id): return all the info for a Player
       player: async(_,{ id },{ dataSources })=>{
         try{
-          const player = await  dataSources.pandaScoreApi.getPlayer(id);
-          return player.map(playerById =>({ 
-            id: playerById.id,
-            slug: playerById.slug,
-            birthday: playerById.birthday,
-            videogame: playerById.current_videogame,
-            team: playerById.current_team,
-            firstname: playerById.first_name,
-            lastName: playerById.last_name,
-            name: playerById.name,
-            nationality: playerById.nationality,
-            image: playerById.image_url
-           }))
+          const playerById = await  dataSources.pandaScoreApi.getPlayer(id);
+          return { 
+            data:{
+              id: playerById.id,
+              slug: playerById.slug,
+              birthday: playerById.birthday,
+              videogame: playerById.current_videogame,
+              team: playerById.current_team,
+              firstname: playerById.first_name,
+              lastName: playerById.last_name,
+              name: playerById.name,
+              nationality: playerById.nationality,
+              image: playerById.image_url,
+              role: playerById.role
+            }
+           }
         }catch(error){
           throw error;
         }
         },
         // videogames: return a list of Videogames
       videogames: async(_,__,{dataSources})=>{
-        return dataSources.pandaScoreApi.getListOfVideoGames();
+        try{
+          const videogamesList = await  dataSources.pandaScoreApi.getListOfVideoGames();
+          return videogamesList.map(videogames =>({ 
+            id: videogames.id,
+            slug: videogames.slug,
+            title: videogames.name,
+            description: videogames.leagues  
+           }))
+        }catch(error){
+          throw error;
+        }
       },
      // videogame(id): return all the details of a Videogame
       videogame: async(_,{ id },{ dataSources })=>{
