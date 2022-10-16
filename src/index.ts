@@ -13,7 +13,6 @@ const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
 
 
 
-// this class is here couse there is a bug called Error [ERR_MODULE_NOT_FOUND] while importing from  api/ and export default doesnt work
 class pandaScoreApi extends RESTDataSource { // highlight-line
   override baseURL = 'https://api.pandascore.co/';
   private token: string;
@@ -24,20 +23,13 @@ class pandaScoreApi extends RESTDataSource { // highlight-line
   }
 
   override willSendRequest(request: WillSendRequestOptions) {
+    request.headers['authorization'] = this.token;
     request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
   }
 
   //players(limit?, page?): return a list of Players
-  async getListOfPlayers(limit, page)  {
-
-    try{
-      const data = await this.get(`players?sort=&page=${page}&per_page=${limit}`)
-      return data;
-
-    }catch(err){
-      throw new Error(err);
-    }
-    
+  async getListOfPlayers()  {
+    return this.get(`players?sort=&page=1&per_page=1`)
   }
 
   //player(id): return all the info for a Player
@@ -102,12 +94,27 @@ class pandaScoreApi extends RESTDataSource { // highlight-line
 }
 
 
-//import problem with resolvers at resolvers/resolvers.ts
 const resolvers = {
   Query: {
     //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
       players: async (_,__, { dataSources }) => {
-          return dataSources.pandaScoreApi.getListOfPlayers();
+          try{
+            const playerList = await  dataSources.pandaScoreApi.getListOfPlayers();
+            return playerList.map(player =>({ 
+              id: player.id,
+              slug: player.slug,
+              birthday: player.birthday,
+              team: player.current_team,
+              videogame: player.current_videogame,
+              firstname: player.first_name,
+              lastName: player.last_name,
+              name: player.name,
+              nationality: player.nationality,
+              image: player.image_url
+             }))
+          }catch(error){
+            throw error;
+          }
         },
     //player(id): return all the info for a Player
       player: async(_,{ id },{ dataSources })=>{
@@ -121,11 +128,11 @@ const resolvers = {
       videogame: async(_,{ id },{ dataSources })=>{
       return dataSources.pandaScoreApi.getVideoGame(id);
      },
-      teams: async(_,__,{dataSources}) =>{
+      teams: async(_,__,{ dataSources }) =>{
         return dataSources.pandascoreApi.getListOfTeams();
      },
      //team(id): return all the details of a Team
-      team: async(_,{id},{dataSources}) =>{
+      team: async(_,{ id },{dataSources}) =>{
         return dataSources.pandaScoreApi.getTeam(id);
      }   
   },
@@ -165,11 +172,12 @@ const resolvers = {
   // this file is here couse there is a proble while importing Error [ERR_MODULE_NOT_FOUND]: Cannot find module and export is not working
   function getTokenFromRequest(req: IncomingMessage) {
     const AuthHeader = req.headers.authorization || '';
+    console.log(AuthHeader);
     if(AuthHeader){
         const token = AuthHeader.split('Bearer')[1];
         if(token){
             try{    
-                return token;
+                return AuthHeader;
             }catch(err){
                throw new Error('Invalid/Expored token');
             }

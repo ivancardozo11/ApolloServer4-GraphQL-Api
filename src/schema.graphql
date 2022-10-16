@@ -31,7 +31,6 @@
   type Player {
     id: Int!
     slug: String!
-    birthdayYear: Int!
     birthday: String!
     team: Team
     videogame: Videogame!
@@ -45,7 +44,7 @@
 
   type Query {
     player: Player
-    players(limit: Int, page: Int): [Player!]
+    players: [Player!]
     team: Team
     teams: [Team!]
     videogame: Videogame
