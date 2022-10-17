@@ -1,13 +1,12 @@
 import { IncomingMessage } from "http";
 
   function getTokenFromRequest(req: IncomingMessage) {
-    //Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4
-    const AuthHeader = req.headers.authorization || '';
+    const AuthHeader = req.headers.authorization || '';  //Bearer token
     if(AuthHeader){
-        const token = AuthHeader.split('Bearer')[1];
+        const token = AuthHeader.split('Bearer')[1];  // token
         if(token){
             try{    
-                return token;
+                return token; //return token
             }catch(err){
                throw new Error('Invalid/Expored token');
             }

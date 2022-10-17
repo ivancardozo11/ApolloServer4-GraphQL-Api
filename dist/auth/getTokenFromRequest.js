@@ -1,11 +1,10 @@
 function getTokenFromRequest(req) {
-    const AuthHeader = req.headers.authorization || '';
+    const AuthHeader = req.headers.authorization || ''; //Bearer token
     if (AuthHeader) {
-        const token = AuthHeader.split('Bearer')[1];
+        const token = AuthHeader.split('Bearer')[1]; // token
         if (token) {
             try {
-                console.log(token);
-                return token;
+                return token; //return token
             }
             catch (err) {
                 throw new Error('Invalid/Expored token');
