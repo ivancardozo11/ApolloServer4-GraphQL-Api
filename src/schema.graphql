@@ -4,11 +4,17 @@ type Featured{
    participants: [Participant!]
 }
 
+ type Article{
+  title: String!
+  text: String!
+ }
 
  type Videogame{
    id: Int!
    name: String!
    slug: String!
+   description: Article
+   players: [player]
  }
  
  type Team{

@@ -8,6 +8,7 @@ import { readFileSync } from 'fs';
 import  getTokenFromRequest  from './auth/getTokenFromRequest.js';
 import pandaScoreApi from './api/pandascore-api.js';
 import resolvers from './resolvers/resolvers.js';
+import wikiApi from './api/wikipedia-api.js';
 
 //Import graphql schema
 const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
@@ -17,6 +18,7 @@ const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
     token: string;
     dataSources: {
         pandascoreApi: pandaScoreApi;
+        wikiApi: wikiApi;
     };
   }
 
@@ -39,6 +41,7 @@ const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
         token, // access token header
         dataSources: {// allow us to access  pandaScoreApi
             pandascoreApi: new pandaScoreApi({ cache, token }),
+            wikiApi: new wikiApi({ cache }) // our second api to retrieve data
         },
       };
     },

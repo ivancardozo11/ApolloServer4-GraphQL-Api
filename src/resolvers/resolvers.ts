@@ -36,21 +36,26 @@ const resolvers = {
         //player(id): return all the info for a Player
         player: async(_,{ playerId },{ dataSources })=>{
             try{
+
+                                /*A Player type will have at least these fields:
+                  o team: should return the Team this player is part of (if any)
+                  o videogame: should return Videogame this player is playing.
+                  */
               const playerById = await  dataSources.pandaScoreApi.getPlayer(playerId);
               return playerById.map( playerById =>({
                   id: playerById.id,
                   slug: playerById.slug,
                   birthday: playerById.birthday,
-                  videogame: {
+                  videogame: {    //This is the videogame the player is playing
                       id: playerById.id,
                       name: playerById.name,
                       slug: playerById.slug
                   },
-                  team:{
+                  team:{  
                       id: playerById.id,
                       slug: playerById.slug,
                       acronym: playerById.acronym,
-                      name: playerById.name,
+                      name: playerById.name, //this is the team the player is part of
                       location: playerById.location,
                       players: playerById.players,
                       image: playerById.image_url,
@@ -101,7 +106,7 @@ const resolvers = {
                 id: tl.id,
                 slug:tl.slug,
                 acronym: tl.acronym,
-                name: tl.name,
+                name: tl.name, //This is the name the team uses for competition.
                 location: tl.location,
                 players: tl.players,
                 image: tl.image_url,
@@ -138,7 +143,10 @@ const resolvers = {
         } catch (error) {
           throw new Error(`Failed to query : ${error}`);
         }
-        }
+        },
+        wikivideogame: async (_, __, { dataSources }) => {
+          return dataSources.wikiApi.getFavorites();
+        },
     }
   };
 
