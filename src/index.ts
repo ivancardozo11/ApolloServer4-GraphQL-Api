@@ -7,65 +7,9 @@ import {
 import { readFileSync } from 'fs';
 import { RESTDataSource, WillSendRequestOptions  } from '@apollo/datasource-rest';
 import type { KeyValueCache } from '@apollo/utils.keyvaluecache';
-import { IncomingMessage } from 'http';
+import  getTokenFromRequest  from './auth/getTokenFromRequest.js';
 
 const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
-
-// const typeDefs = ` union Participant = Player | Team
-
-// type Featured{
-//    participants: [Participant!]
-// }
-
-//  type Article{
-//    title: String!
-//    text: String!
-//  }
-
-//  type Videogame{
-//    id: Int!
-//    slug: String!
-//    title: String!
-//    description: Article
-//    players: [Player!]
-//  }
- 
-//  type Team{
-//    id: Int!
-//    slug: String!
-//    acronym: String!
-//    name: String!
-//    location: String!
-//    players: [Player!]!
-//    image: String
-//    videogame: Videogame!
-//  }
-  
-//  type Player {
-//    id: Int!
-//    slug: String!
-//    birthday: String
-//    team: Team
-//    videogame: Videogame!
-//    firstName: String!
-//    lastName: String!
-//    name: String!
-//    nationality: String!
-//    image: String
-//    role: String!
-
-//  }
-
-//  type Query {
-//    players(page: Int, per_page: Int): [Player!]!
-//    player(id: Int!): Player
-//    team: Team
-//    teams: [Team!]
-//    videogame: Videogame
-//    videogames(limit: Int, page: Int): [Videogame!]
-//    featured: Featured
-//  }
-// `
 
 
  class pandaScoreApi extends RESTDataSource { // highlight-line
@@ -162,7 +106,7 @@ const resolvers = {
             }
            }
         }catch(error){
-          throw error;
+          throw new Error(`Failed to query : ${error}`);
         }
         },
         // videogames: return a list of Videogames
@@ -225,21 +169,21 @@ const resolvers = {
   });
 
   // this file is here couse there is a proble while importing Error [ERR_MODULE_NOT_FOUND]: Cannot find module and export is not working
-  function getTokenFromRequest(req: IncomingMessage) {
-    const AuthHeader = req.headers.authorization || '';
-    if(AuthHeader){
-        const token = AuthHeader.split('Bearer')[1];
-        if(token){
-            try{    
-                return token;
-            }catch(err){
-               throw new Error('Invalid/Expored token');
-            }
-        }
-        throw new Error('Authentication token must be Bearer[token]');
-    }
-    throw new Error('Authentication header must be provided');
-  };
+  // function getTokenFromRequest(req: IncomingMessage) {
+  //   const AuthHeader = req.headers.authorization || '';
+  //   if(AuthHeader){
+  //       const token = AuthHeader.split('Bearer')[1];
+  //       if(token){
+  //           try{    
+  //               return token;
+  //           }catch(err){
+  //              throw new Error('Invalid/Expored token');
+  //           }
+  //       }
+  //       throw new Error('Authentication token must be Bearer[token]');
+  //   }
+  //   throw new Error('Authentication header must be provided');
+  // };
   
   console.log(`🚀  Server ready at: ${url}`);
 

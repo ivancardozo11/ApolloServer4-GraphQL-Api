@@ -3,6 +3,7 @@ import { startStandaloneServer } from '@apollo/server/standalone';
 import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault, } from '@apollo/server/plugin/landingPage/default';
 import { readFileSync } from 'fs';
 import { RESTDataSource } from '@apollo/datasource-rest';
+import getTokenFromRequest from './auth/getTokenFromRequest.js';
 const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
 // const typeDefs = ` union Participant = Player | Team
 // type Featured{
@@ -127,7 +128,7 @@ const resolvers = {
                 };
             }
             catch (error) {
-                throw error;
+                throw new Error(`Failed to query : ${error}`);
             }
         },
         // videogames: return a list of Videogames
@@ -180,21 +181,19 @@ const { url } = await startStandaloneServer(server, {
     },
 });
 // this file is here couse there is a proble while importing Error [ERR_MODULE_NOT_FOUND]: Cannot find module and export is not working
-function getTokenFromRequest(req) {
-    const AuthHeader = req.headers.authorization || '';
-    if (AuthHeader) {
-        const token = AuthHeader.split('Bearer')[1];
-        if (token) {
-            try {
-                return token;
-            }
-            catch (err) {
-                throw new Error('Invalid/Expored token');
-            }
-        }
-        throw new Error('Authentication token must be Bearer[token]');
-    }
-    throw new Error('Authentication header must be provided');
-}
-;
+// function getTokenFromRequest(req: IncomingMessage) {
+//   const AuthHeader = req.headers.authorization || '';
+//   if(AuthHeader){
+//       const token = AuthHeader.split('Bearer')[1];
+//       if(token){
+//           try{    
+//               return token;
+//           }catch(err){
+//              throw new Error('Invalid/Expored token');
+//           }
+//       }
+//       throw new Error('Authentication token must be Bearer[token]');
+//   }
+//   throw new Error('Authentication header must be provided');
+// };
 console.log(`🚀  Server ready at: ${url}`);
