@@ -20,22 +20,23 @@ class pandaScoreApi extends RESTDataSource { // highlight-line
     async getListOfPlayers(page, per_page) {
   
       const players = await this.get(`players?sort=&page=${page}&per_page=${per_page}`);
-      return players.data;
+      return players;
       
     }
   
     //player(id): return all the info for a Player
     // return example :{ "id": 1, "name": "LoL", "slug": "league-of-legends" }
-    async getPlayer(id)  {
-      const result = await this.get(`players/${id}`);
+    async getPlayer(playerId)  {
+      const result = await this.get(`players/${encodeURIComponent(playerId)}`);
       return result;
     }
   
   
     // videogames: return a list of Videogames
-    async getListOfVideoGames()  {
+    async getListOfVideoGames(page, per_page)  {
   
-      return this.get(`videogames?page=1&per_page=1`);
+      const result = await this.get(`videogames?page=${page}&per_page=${per_page}`);
+      return result;
       
     }
     // videogame(id): return all the details of a Videogame
