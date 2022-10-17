@@ -138,9 +138,6 @@ const resolvers = {
         } catch (error) {
           throw new Error(`Failed to query : ${error}`);
         }
-        },
-        featured: async(_,__,{ dataSources })=>{
-
         }
     }
   };
