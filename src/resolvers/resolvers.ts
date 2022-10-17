@@ -1,3 +1,5 @@
+import { title } from "process";
+
 const resolvers = {
     Query: {
       //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
@@ -144,8 +146,22 @@ const resolvers = {
           throw new Error(`Failed to query : ${error}`);
         }
         },
-        wikivideogame: async (_, __, { dataSources }) => {
-          return dataSources.wikiApi.getFavorites();
+        wikivideogame: async (_, { wikiGameId }, { dataSources }) => {
+          try{
+            const wiki = await  dataSources.pandaScoreApi.dataSources.wikiApi.getVideoGame(wikiGameId);
+            return wiki.map(wiki =>({ 
+              id: wiki.id,
+              slug: wiki.slug,
+              name: wiki.name,
+              description: {
+                title: wiki.title,
+                text: wiki.text
+              },
+              players: wiki.players
+             }))
+          }catch(error){
+            throw new Error(`Failed to query : ${error}`);
+          }
         },
     }
   };

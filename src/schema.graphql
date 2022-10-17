@@ -9,12 +9,13 @@ type Featured{
   text: String!
  }
 
+
  type Videogame{
    id: Int!
    name: String!
    slug: String!
    description: Article
-   players: [player]
+   players: Player
  }
  
  type Team{
@@ -58,4 +59,6 @@ type Featured{
    videogames(page: Int, per_page: Int): [Videogame!]
    "Returns a mix of teams"
    featured: [Featured]
+   "should implement wikipedia api"
+   wikivideogame(id: Int): [Videogame!]
  }

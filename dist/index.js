@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import getTokenFromRequest from './auth/getTokenFromRequest.js';
 import pandaScoreApi from './api/pandascore-api.js';
 import resolvers from './resolvers/resolvers.js';
+import wikiApi from './api/wikipedia-api.js';
 //Import graphql schema
 const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
 const server = new ApolloServer({
@@ -24,6 +25,7 @@ const { url } = await startStandaloneServer(server, {
             token,
             dataSources: {
                 pandascoreApi: new pandaScoreApi({ cache, token }),
+                wikiApi: new wikiApi({ cache }) // our second api to retrieve data
             },
         };
     },

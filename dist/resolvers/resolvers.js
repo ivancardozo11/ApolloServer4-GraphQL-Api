@@ -37,6 +37,10 @@ const resolvers = {
         //player(id): return all the info for a Player
         player: async (_, { playerId }, { dataSources }) => {
             try {
+                /*A Player type will have at least these fields:
+  o team: should return the Team this player is part of (if any)
+  o videogame: should return Videogame this player is playing.
+  */
                 const playerById = await dataSources.pandaScoreApi.getPlayer(playerId);
                 return playerById.map(playerById => ({
                     id: playerById.id,
@@ -142,7 +146,25 @@ const resolvers = {
             catch (error) {
                 throw new Error(`Failed to query : ${error}`);
             }
-        }
+        },
+        wikivideogame: async (_, { wikiGameId }, { dataSources }) => {
+            try {
+                const wiki = await dataSources.pandaScoreApi.dataSources.wikiApi.getVideoGame(wikiGameId);
+                return wiki.map(wiki => ({
+                    id: wiki.id,
+                    slug: wiki.slug,
+                    name: wiki.name,
+                    description: {
+                        title: wiki.title,
+                        text: wiki.text
+                    },
+                    players: wiki.players
+                }));
+            }
+            catch (error) {
+                throw new Error(`Failed to query : ${error}`);
+            }
+        },
     }
 };
 export default resolvers;
