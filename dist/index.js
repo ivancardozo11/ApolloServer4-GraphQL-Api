@@ -1,63 +1,57 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault, } from '@apollo/server/plugin/landingPage/default';
+import { readFileSync } from 'fs';
 import { RESTDataSource } from '@apollo/datasource-rest';
-// const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
-const typeDefs = ` union Participant = Player | Team
-
-type Featured{
-   participants: [Participant!]
-}
-
- type Article{
-   title: String!
-   text: String!
- }
-
- type Videogame{
-   id: Int!
-   slug: String!
-   title: String!
-   description: Article
-   players: [Player!]
- }
- 
- type Team{
-   id: Int!
-   slug: String!
-   acronym: String!
-   name: String!
-   location: String!
-   players: [Player!]!
-   image: String
-   videogame: Videogame!
- }
-  
- type Player {
-   id: Int!
-   slug: String!
-   birthday: String
-   team: Team
-   videogame: Videogame!
-   firstName: String!
-   lastName: String!
-   name: String!
-   nationality: String!
-   image: String
-   role: String!
-
- }
-
- type Query {
-   players(page: Int, per_page: Int): [Player!]!
-   player(id: Int!): Player
-   team: Team
-   teams: [Team!]
-   videogame: Videogame
-   videogames(limit: Int, page: Int): [Videogame!]
-   featured: Featured
- }
-`;
+const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
+// const typeDefs = ` union Participant = Player | Team
+// type Featured{
+//    participants: [Participant!]
+// }
+//  type Article{
+//    title: String!
+//    text: String!
+//  }
+//  type Videogame{
+//    id: Int!
+//    slug: String!
+//    title: String!
+//    description: Article
+//    players: [Player!]
+//  }
+//  type Team{
+//    id: Int!
+//    slug: String!
+//    acronym: String!
+//    name: String!
+//    location: String!
+//    players: [Player!]!
+//    image: String
+//    videogame: Videogame!
+//  }
+//  type Player {
+//    id: Int!
+//    slug: String!
+//    birthday: String
+//    team: Team
+//    videogame: Videogame!
+//    firstName: String!
+//    lastName: String!
+//    name: String!
+//    nationality: String!
+//    image: String
+//    role: String!
+//  }
+//  type Query {
+//    players(page: Int, per_page: Int): [Player!]!
+//    player(id: Int!): Player
+//    team: Team
+//    teams: [Team!]
+//    videogame: Videogame
+//    videogames(limit: Int, page: Int): [Videogame!]
+//    featured: Featured
+//  }
+// `
 class pandaScoreApi extends RESTDataSource {
     constructor(options) {
         super(options); // this sends our server's `cache` through
@@ -109,7 +103,6 @@ const resolvers = {
                 return players;
             }
             catch (error) {
-                console.log(error);
                 throw new Error(`Failed to query : ${error}`);
             }
         },
