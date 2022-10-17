@@ -9,6 +9,7 @@ import  getTokenFromRequest  from './auth/getTokenFromRequest.js';
 import pandaScoreApi from './api/pandascore-api.js';
 import resolvers from './resolvers/resolvers.js';
 
+//Import graphql schema
 const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
 
 
@@ -21,8 +22,8 @@ const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
 
 
   const server = new ApolloServer<ContextValue>({
-    typeDefs,
-    resolvers,
+    typeDefs,// schema to query
+    resolvers,// data inside the query
     plugins: [
       process.env.NODE_ENV === 'production'
         ? ApolloServerPluginLandingPageProductionDefault()
@@ -35,8 +36,8 @@ const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
       const token =  getTokenFromRequest(req); // header token
       const { cache } = server;
       return {
-        token,
-        dataSources: {
+        token, // access token header
+        dataSources: {// allow us to access  pandaScoreApi
             pandascoreApi: new pandaScoreApi({ cache, token }),
         },
       };

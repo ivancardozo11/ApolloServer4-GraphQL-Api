@@ -42,21 +42,23 @@ class pandaScoreApi extends RESTDataSource { // highlight-line
     // videogame(id): return all the details of a Videogame
     /*slug examples:
       "cod-mw" ,"cs-go" ,"dota-2" , "fifa" ,"kog" ,"league-of-legends" ,"lol-wild-rift" ,"ow" ,"pubg","r6-siege","rl","starcraft-2","starcraft-brood-war","valorant" */
-    async getVideoGame()  {
+    async getVideoGame(gameID)  {
   
-      return this.get(`videogames/fifa`);
+      const result = await this.get(`videogames/${encodeURIComponent(gameID)}`);
+      return result;
     }
   
     //teams: return a list of Teams
   
-    async getListOfTeams()  {
-      return this.get(`teams?sort=&page=1&per_page=1`);
+    async getListOfTeams(page, per_page)  {
+      const result = await this.get(`teams?sort=&page=${page}&per_page=${per_page}`);
+      return result;
     }
     // team(id): return all the details of a Team
    // https://api.pandascore.co/teams/league-of-legends
-    async getTeam(){
+    async getTeam(teamId){
   
-      return this.get(`teams/league-of-legends`);
+      return this.get(`teams/${encodeURIComponent(teamId)}`);
     }
   }
 

@@ -32,53 +32,29 @@ const resolvers = {
               throw new Error(`Failed to query : ${error}`);
             }
           },
-          // videogames: return a list of Videogames
-        videogames: async(_,{page, per_page},{ dataSources })=>{
-          try{
-            const videogamesList = await  dataSources.pandaScoreApi.getListOfVideoGames(page, per_page);
-            return videogamesList.map(videogames =>({ 
-              id: videogames.id,
-              slug: videogames.slug,
-              title: videogames.name,
-              description: videogames.leagues  
-             }))
-          }catch(error){
-            throw new Error(`Failed to query : ${error}`);
-          }
-        },
-       // videogame(id): return all the details of a Videogame
-        videogame: async(_,{ id },{ dataSources })=>{
-        return dataSources.pandaScoreApi.getVideoGame(id);
-       },
-        teams: async(_,__,{ dataSources }) =>{
-          return dataSources.pandascoreApi.getListOfTeams();
-       },
-       //team(id): return all the details of a Team
-        team: async(_,{ id },{dataSources}) =>{
-          return dataSources.pandaScoreApi.getTeam(id);
-       }   
-    },
-    Player:{
+          //by adding queries this way uses the parent argument to use the data from player/videogame/team already loaded, this makes  request faster
         //player(id): return all the info for a Player
-        player: async({ playerId } ,__,{ dataSources })=>{
+        player: async(_,{ playerId },{ dataSources })=>{
             try{
               const playerById = await  dataSources.pandaScoreApi.getPlayer(playerId);
               return playerById.map( playerById =>({
                   id: playerById.id,
                   slug: playerById.slug,
                   birthday: playerById.birthday,
-                  current_videogame: {
+                  videogame: {
                       id: playerById.id,
-                      title: playerById.name,
+                      name: playerById.name,
                       slug: playerById.slug
                   },
-                  current_team:{
+                  team:{
                       id: playerById.id,
                       slug: playerById.slug,
                       acronym: playerById.acronym,
                       name: playerById.name,
                       location: playerById.location,
-                      image: playerById.image_url
+                      players: playerById.players,
+                      image: playerById.image_url,
+                      videogame: playerById.current_videogame
                   },
                   firstname: playerById.first_name,
                   lastName: playerById.last_name,
@@ -90,7 +66,79 @@ const resolvers = {
             }catch(error){
               throw new Error(`Failed to query : ${error}`);
         }
-      }
+      },
+          // videogames: return a list of Videogames
+        videogames: async(_,{ page, per_page },{ dataSources })=>{
+          try{
+            const videogamesList = await  dataSources.pandaScoreApi.getListOfVideoGames(page, per_page);
+            return videogamesList.map(vd =>({ 
+              id: vd.id,
+              slug: vd.slug,
+              name: vd.name  
+             }))
+          }catch(error){
+            throw new Error(`Failed to query : ${error}`);
+          }
+        },
+         // videogame(id): return all the details of a Videogame
+         videogame: async(_,{ gameID },{ dataSources })=>{
+            try{
+            const videogamesList = await  dataSources.pandaScoreApi.getVideoGame(gameID);
+            return videogamesList.map(vd =>({ 
+              id: vd.id,
+              slug: vd.slug,
+              name: vd.name
+             }))
+          }catch(error){
+            throw new Error(`Failed to query : ${error}`);
+          }
+           },
+        //teams: return a list of Teams
+        teams: async(_,{ page, per_page },{ dataSources }) =>{
+            try {
+              const teamList = await dataSources.pandascoreApi.getListOfTeams(page, per_page);
+              return teamList.map(tl =>({
+                id: tl.id,
+                slug:tl.slug,
+                acronym: tl.acronym,
+                name: tl.name,
+                location: tl.location,
+                players: tl.players,
+                image: tl.image_url,
+                current_videogame: {
+                    id: tl.id,
+                    slug: tl.slug,
+                    name: tl.name
+                }
+              }))
+            
+          } catch (error) {
+            throw new Error(`Failed to query : ${error}`);
+          }
+       },
+       //team(id): return all the details of a Team
+      team:  async(_,{ teamId },{ dataSources }) =>{
+        try {
+            const team = await dataSources.pandascoreApi.getTeam(teamId);
+            return team.map(tl =>({
+              id: tl.id,
+              slug:tl.slug,
+              acronym: tl.acronym,
+              name: tl.name,
+              location: tl.location,
+              players: tl.players,
+              image: tl.image_url,
+              current_videogame: {
+                  id: tl.id,
+                  slug: tl.slug,
+                  name: tl.name
+              }
+            }))
+          
+        } catch (error) {
+          throw new Error(`Failed to query : ${error}`);
+        }
+        } 
     }
   };
 
