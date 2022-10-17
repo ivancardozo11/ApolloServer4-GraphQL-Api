@@ -1,4 +1,6 @@
 import { RESTDataSource } from '@apollo/datasource-rest';
+import * as dotenv from 'dotenv';
+dotenv.config();
 class pandaScoreApi extends RESTDataSource {
     constructor(options) {
         super(options); // this sends our server's `cache` through
@@ -7,7 +9,7 @@ class pandaScoreApi extends RESTDataSource {
     }
     willSendRequest(request) {
         request.headers['authorization'] = this.token;
-        request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
+        request.params.set('${process.env.API_KEY}', this.token);
     }
     //players(limit?, page?): return a list of Players
     async getListOfPlayers(page, per_page) {

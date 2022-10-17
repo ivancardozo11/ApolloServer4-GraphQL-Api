@@ -1,5 +1,8 @@
 import { RESTDataSource, WillSendRequestOptions  } from '@apollo/datasource-rest';
 import type { KeyValueCache } from '@apollo/utils.keyvaluecache';
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 
 class pandaScoreApi extends RESTDataSource { // highlight-line
     override baseURL = 'https://api.pandascore.co/';
@@ -12,7 +15,7 @@ class pandaScoreApi extends RESTDataSource { // highlight-line
   
     override willSendRequest(request: WillSendRequestOptions) {
       request.headers['authorization'] = this.token;
-      request.params.set('Bearer 8sCOL40JsUIUb5haQHaNFUrX-C3CqyLGnt8-u4KZby4OU8EvhO4', this.token);
+      request.params.set('${process.env.API_KEY}', this.token);
     }
   
   

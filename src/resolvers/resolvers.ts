@@ -1,5 +1,3 @@
-import { title } from "process";
-
 const resolvers = {
     Query: {
       //returns a list of players and sets a a limit of amount of pages and determine in wich page we are going to be
