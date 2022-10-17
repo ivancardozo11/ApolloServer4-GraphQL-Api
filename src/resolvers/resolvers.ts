@@ -81,7 +81,7 @@ const resolvers = {
           }
         },
          // videogame(id): return all the details of a Videogame
-         videogame: async(_,{ gameID },{ dataSources })=>{
+        videogame: async(_,{ gameID },{ dataSources })=>{
             try{
             const videogamesList = await  dataSources.pandaScoreApi.getVideoGame(gameID);
             return videogamesList.map(vd =>({ 
@@ -117,7 +117,7 @@ const resolvers = {
           }
        },
        //team(id): return all the details of a Team
-      team:  async(_,{ teamId },{ dataSources }) =>{
+        team:  async(_,{ teamId },{ dataSources }) =>{
         try {
             const team = await dataSources.pandascoreApi.getTeam(teamId);
             return team.map(tl =>({
@@ -138,7 +138,10 @@ const resolvers = {
         } catch (error) {
           throw new Error(`Failed to query : ${error}`);
         }
-        } 
+        },
+        featured: async(_,__,{ dataSources })=>{
+
+        }
     }
   };
 

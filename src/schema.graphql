@@ -50,5 +50,6 @@ type Featured{
    videogame(id: Int!): Videogame
    "returns a list of videogames"
    videogames(limit: Int, page: Int): [Videogame!]
-   featured: Featured
+   "Returns a mix of teams"
+   featured: [Featured]
  }
