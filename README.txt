@@ -1,3 +1,13 @@
+Quick start: 
+
+-npm run start
+
+// index.ts 
+
+: ApolloServerPluginLandingPageLocalDefault({ embed: false }), --> this means prod, write: true if you want acces to playground to query
+
+Server will start in: Server ready at: http://localhost:4000/
+
 This is a POC for a Graphql API.
 
 In this file you will find how to start the aplication 

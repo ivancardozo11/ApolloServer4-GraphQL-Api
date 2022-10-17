@@ -9,7 +9,7 @@
     "dev": "ts-node-dev src/index.ts",
     "compile": "tsc",
     "postinstall": "npm run compile",
-    "start": "npm run compile && node ./dist/index.js"
+    "start": " npm run compile && NODE_ENV=production node ./dist/index.js"
   },
   "keywords": [],
   "author": "",

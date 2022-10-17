@@ -1,12 +1,17 @@
-# Ignora archivos del sistema Mac 
+# Ignore Mac Files
 .DS_store
 
-# Ignora la carpeta node_modules
+# Ignore folder node_modules
 node_modules
 
-# Ignora todos los archivos de texto
+# Ignore text files
 *.txt
 
-# Ignora los archivos relacionados a API keys
+# Ignore api keys
 .env
 
+#production
+./dist
+
+#vs code
+.vscode

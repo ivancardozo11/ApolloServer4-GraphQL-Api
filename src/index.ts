@@ -10,6 +10,8 @@ import pandaScoreApi from './api/pandascore-api.js';
 import resolvers from './resolvers/resolvers.js';
 import wikiApi from './api/wikipedia-api.js';
 
+
+
 //Import graphql schema
 const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
 
@@ -29,7 +31,7 @@ const typeDefs = readFileSync('./src/schema.graphql', { encoding: 'utf-8' });
     plugins: [
       process.env.NODE_ENV === 'production'
         ? ApolloServerPluginLandingPageProductionDefault()
-        : ApolloServerPluginLandingPageLocalDefault({ embed: true }), // embed: false if want code enabled in production. This will turn off the playground to query data.
+        : ApolloServerPluginLandingPageLocalDefault({ embed: false }), // embed: false if want code enabled in production. This will turn off the playground to query data.
     ]
   });
 

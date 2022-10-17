@@ -14,7 +14,7 @@ const server = new ApolloServer({
     plugins: [
         process.env.NODE_ENV === 'production'
             ? ApolloServerPluginLandingPageProductionDefault()
-            : ApolloServerPluginLandingPageLocalDefault({ embed: true }), // embed: false if want code enabled in production. This will turn off the playground to query data.
+            : ApolloServerPluginLandingPageLocalDefault({ embed: false }), // embed: false if want code enabled in production. This will turn off the playground to query data.
     ]
 });
 const { url } = await startStandaloneServer(server, {
